@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">iBuy App</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <!-- Strings for the empty state fragment -->
+    <string name="empty_state_header">No lists saved</string>
+    <string name="empty_state_subheader">Create a list and it will show up here.</string>
+
+    <!-- Labels for buttons -->
+    <string name="list_name_string">%s</string>
+</resources>
