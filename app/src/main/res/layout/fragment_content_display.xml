@@ -18,8 +18,11 @@
                 android:id="@+id/display_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 android:scrollbars="vertical"
                 android:clipToPadding="false"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
                 tools:listitem="@layout/list_item_display_list"/>
 
         </RelativeLayout>
@@ -31,8 +34,7 @@
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="16dp"
             android:layout_marginBottom="16dp"
-            android:clickable="true"
-            android:focusable="true"
+            app:elevation="6dp"
             app:srcCompat="@drawable/ic_create_list"
             tools:ignore="ContentDescription" />
 

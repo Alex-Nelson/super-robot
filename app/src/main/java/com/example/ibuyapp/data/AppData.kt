@@ -13,8 +13,8 @@ data class Item(
     @ColumnInfo(name = "item_string")
     var itemString: String,
 
-    @ColumnInfo(name = "item_list_id")
-    val itemListId: Long
+    @ColumnInfo(name = "listId")
+    val listId: Long
 )
 
 /**
@@ -30,13 +30,13 @@ data class UserList(
 )
 
 /**
- * Represents the relationship between a list and one or more items
+ * Represents the relationship between a list and zero or more items
  * */
 data class ListWithItems(
     @Embedded val list: UserList,
     @Relation(
         parentColumn = "listId",
-        entityColumn = "item_list_id"
+        entityColumn = "listId"
     )
-    val items: List<Item>
+    var items: List<Item>
 )

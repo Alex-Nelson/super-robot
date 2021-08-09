@@ -10,5 +10,25 @@
         android:id="@+id/displayFragment"
         android:name="com.example.ibuyapp.display.DisplayFragment"
         android:label="DisplayFragment"
-        tools:layout="@layout/fragment_display" />
+        tools:layout="@layout/fragment_display" >
+        <action
+            android:id="@+id/action_displayFragment_to_manageListFragment"
+            app:destination="@id/manageListFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:exitAnim="@android:anim/slide_out_right"
+            app:popUpTo="@id/displayFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/manageListFragment"
+        android:name="com.example.ibuyapp.manage.ManageListFragment"
+        android:label="ManageListFragment"
+        tools:layout="@layout/fragment_manage_list">
+        <argument
+            android:name="id"
+            app:argType="long" />
+        <action
+            android:id="@+id/action_manageListFragment_to_displayFragment"
+            app:destination="@id/displayFragment" />
+    </fragment>
 </navigation>

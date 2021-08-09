@@ -62,7 +62,8 @@ interface AppDao {
     /**
      * Function for the one-to-many relationship
      * */
+    // Get all items associated with the list
     @Transaction
     @Query("SELECT * FROM list_table WHERE listId = :key")
-    fun getListWithItems(key: Long): List<ListWithItems>
+    suspend fun getListWithItems(key: Long): LiveData<List<ListWithItems>>
 }

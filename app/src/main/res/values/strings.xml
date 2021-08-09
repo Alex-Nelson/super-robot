@@ -9,4 +9,13 @@
 
     <!-- Labels for buttons -->
     <string name="list_name_string">%s</string>
+    <string name="text_view_hint">Type Here…</string>
+    <string name="enter_list_name">List Name</string>
+
+    <!-- Dialog Strings -->
+    <string name="new_list_name">New List Name</string>
+    <string name="cancel">Cancel</string>
+    <string name="create">Create</string>
+    <string name="create_new_list">Create New List</string>
+    <string name="enter_a_name_for_the_list">Enter a name for the list.</string>
 </resources>

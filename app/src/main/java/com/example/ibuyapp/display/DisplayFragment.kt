@@ -1,13 +1,12 @@
 package com.example.ibuyapp.display
 
 import android.os.Bundle
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import android.widget.ViewFlipper
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.example.ibuyapp.R
 import com.example.ibuyapp.data.AppDatabase
@@ -54,15 +53,28 @@ class DisplayFragment : Fragment() {
             .get(DisplayViewModel::class.java)
 
         listAdapter = DisplayListAdapter()
-        recyclerView.adapter = listAdapter
 
         // Observe the view state to render the correct layout
         viewModel.viewState.observe(viewLifecycleOwner, {state ->
             render(state)
         })
 
-        // TODO: Set an onClickListener for the FAB
+        recyclerView.adapter = listAdapter
 
+        // Set an onClickListener for the FAB
+        binding.emptyState.createNewListFAB.setOnClickListener { viewModel.onFabClicked() }
+        binding.contentState.createNewListFAB.setOnClickListener { viewModel.onFabClicked() }
+
+        // Navigate to the next screen to create a new list when the FAB is clicked
+        viewModel.navigateToManageList.observe(viewLifecycleOwner, {
+            if (it == true){
+                this.findNavController()
+                    .navigate(DisplayFragmentDirections
+                    .actionDisplayFragmentToManageListFragment(0L))
+
+                viewModel.doneNavigatingToManageList()
+            }
+        })
 
     }
 

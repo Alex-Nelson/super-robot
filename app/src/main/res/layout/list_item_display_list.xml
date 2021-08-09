@@ -7,6 +7,9 @@
         <variable
             name="list"
             type="com.example.ibuyapp.data.UserList" />
+        <variable
+            name="viewModel"
+            type="com.example.ibuyapp.display.DisplayViewModel" />
     </data>
 
     <Button
@@ -17,5 +20,7 @@
         android:padding="8dp"
         app:setListName="@{list}"
         app:buttonListener="@{list}"
+        app:listId="@{list.listId}"
+        app:viewModel="@{viewModel}"
         tools:text="Shopping List"/>
 </layout>
