@@ -13,10 +13,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.listapp.data.ListDatabase
 import com.example.listapp.data.UserList
-import com.example.listapp.home.HomeViewModel
-import com.example.listapp.home.HomeViewModelFactory
-import com.example.listapp.home.LandingScreen
-import com.example.listapp.home.ListHome
+import com.example.listapp.home.*
 import com.example.listapp.ui.theme.ListAppTheme
 
 class ListApplication : ComponentActivity() {
@@ -34,7 +31,7 @@ class ListApplication : ComponentActivity() {
             .get(HomeViewModel::class.java)
 
         // The app draws behind the system bars, so we need to handle fitting system windows
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        //WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             ListAppTheme {
@@ -60,14 +57,15 @@ private fun MainScreen(viewModel: HomeViewModel){
             // FIXME: Change to mutableStateListOf
             val lists: List<UserList> by viewModel.lists.observeAsState(initial = listOf())
 
-            ListHome(
-                //lists = viewModel.lists,
+            HomeScreen(
                 lists = lists,
-                newName = viewModel.newName,
+                deleteLists = viewModel::deleteLists.get(),
                 onAddList = viewModel::onSaveName,
+                onEditDone = viewModel::onNameDone,
                 onRemoveList = viewModel::onRemove,
-                onRemoveAllLists = viewModel::onRemoveAllLists,
-                onEditDone = viewModel::onNameDone
+                onListClicked = viewModel::onListClicked,
+                onRemoveLists = viewModel::onDeleteLists,
+                onCancel = viewModel::onCancelDelete
             )
         }
     }

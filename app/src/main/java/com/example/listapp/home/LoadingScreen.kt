@@ -15,7 +15,7 @@ import kotlinx.coroutines.delay
 /**
  *
  * */
-private const val SplashWaitTime: Long = 2000
+private const val SplashWaitTime: Long = 4000
 
 @Composable
 fun LandingScreen(modifier: Modifier = Modifier, onTimeout: () -> Unit){

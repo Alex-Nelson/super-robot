@@ -3,4 +3,5 @@
     <string name="title_list_application">ListApplication</string>
     <string name="create_list">Create</string>
     <string name="home_screen_label">Home</string>
+    <string name="delete_list_ddm">Delete List(s)</string>
 </resources>

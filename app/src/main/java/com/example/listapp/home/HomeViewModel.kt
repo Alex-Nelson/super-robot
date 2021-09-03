@@ -20,15 +20,15 @@ class HomeViewModel(dataSource: ListDao): ViewModel() {
     // Hold a reference to the database via ListDao
     private val database = dataSource
 
-    // List of list names
-//    var lists = mutableStateListOf<UserList>()
-//     private set
+    // List of lists to delete
+    var deleteLists = mutableStateListOf<UserList>()
+        private set
+
+    // List of lists
     private var _lists = database.selectAllLists()
     val lists: LiveData<List<UserList>> = _lists
 
     private var currentName by mutableStateOf("")
-    val newName: String
-        get() = currentName
 
     /** State variables */
     private var _navigateToManageList by mutableStateOf(false)
@@ -45,11 +45,42 @@ class HomeViewModel(dataSource: ListDao): ViewModel() {
     val showSnackbar: Boolean
         get() = _showSnackbar
 
-//    fun getLists(){
-//        viewModelScope.launch {
-//            lists = database.selectAllLists()
-//        }
-//    }
+    // Snackbar for when at least one list is deleted
+    private var _deleteListSnackbar by mutableStateOf(false)
+    val deleteListSnackbar: Boolean
+        get() = _deleteListSnackbar
+
+    /**
+     * Set the snackbar state to true
+     *
+     * @param type (state) The type of snackbar that will shown
+     * */
+    fun showSnackbar(type: String){
+        when (type) {
+            "delete" -> {
+                _deleteListSnackbar = true
+            }
+            "show" -> {
+                _showSnackbar = true
+            }
+        }
+    }
+
+    /**
+     * Set the snackbar state to false
+     *
+     * @param type (state) The type of snackbar that was shown
+     * */
+    fun doneShowingSnackbar(type: String){
+        when (type) {
+            "delete" -> {
+                _deleteListSnackbar = false
+            }
+            "show" -> {
+                _showSnackbar = false
+            }
+        }
+    }
 
     /**
      * Let ListHome know to navigate to ManageList when a name is clicked
@@ -94,13 +125,11 @@ class HomeViewModel(dataSource: ListDao): ViewModel() {
         database.insertList(list)
 
         // Save the new list's id
-        // FIXME: java.lang.IllegalStateException: Cannot access database on the main thread since
-        //  it may potentially lock the UI for a long period of time.
         _newListId = database.selectNewList().id
     }
 
     /**
-     * Removes the given list from the database
+     * Removes the given list from the database when a list is swiped by user.
      *
      * @param list a [UserList] that will be removed from the database
      * */
@@ -111,11 +140,17 @@ class HomeViewModel(dataSource: ListDao): ViewModel() {
     }
 
     /**
-     * Delete the list and all the items
+     * Delete the list and all the items.
+     *
+     * @param list a [UserList] that will be removed from the database
      * */
     private suspend fun deleteList(list: UserList){
-        // Delete all items in list first
-        database.deleteItems(list.id)
+        val listItems = database.getListWithItems(list.id)[0].items
+
+        // Delete all items in list first if there are any
+        if(listItems.isNotEmpty()){
+            database.deleteItems(list.id)
+        }
 
         // Delete the list
         database.deleteList(list)
@@ -124,11 +159,71 @@ class HomeViewModel(dataSource: ListDao): ViewModel() {
     /**
      * Remove all lists and items
      * */
-    fun onRemoveAllLists(){
+    private fun onRemoveAllLists(){
         viewModelScope.launch {
             database.deleteAllItems()
 
             database.deleteAllLists()
+
+            // TODO: Show snackbar confirming all lists were deleted
         }
+    }
+
+    /**
+     * Adds a list to be deleted or removes a list from being deleted when user clicks a list.
+     *
+     * @param list a [UserList] that was clicked
+     * */
+    fun onListClicked(list: UserList){
+        if(deleteLists.contains(list)){
+            removeDeletingList(list)
+        }else{
+            addDeletingList(list)
+        }
+    }
+
+    /**
+     * Add a list to be removed
+     *
+     * @param list a [UserList] that will be removed
+     * */
+    private fun addDeletingList(list: UserList){
+        deleteLists.add(list)
+    }
+
+    /**
+     * Remove a list that was to be removed
+     *
+     * @param list a [UserList] that will not be removed
+     * */
+    private fun removeDeletingList(list: UserList){
+        deleteLists.remove(list)
+
+        // TODO: Show snackbar confirming list was deleted
+    }
+
+    /**
+     * Delete all lists that were selected by user
+     * */
+    fun onDeleteLists(){
+        if(deleteLists.size == lists.value!!.size){
+            onRemoveAllLists()
+        }
+        else{
+            viewModelScope.launch {
+                for(list in deleteLists){
+                    deleteList(list)
+                }
+
+                // TODO: Show snackbar confirming all selected lists were deleted
+            }
+        }
+    }
+
+    /**
+     * Remove all lists that were to be deleted if user cancels the action
+     * */
+    fun onCancelDelete(){
+        deleteLists.clear()
     }
 }

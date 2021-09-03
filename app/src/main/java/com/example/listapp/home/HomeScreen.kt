@@ -15,8 +15,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -28,6 +28,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.example.listapp.HomeAppBar
+import com.example.listapp.HomeBottomAppBar
 import com.example.listapp.R
 import com.example.listapp.data.UserList
 import com.example.listapp.ui.theme.ListAppTheme
@@ -36,53 +38,50 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
-import com.example.listapp.AppBar
-
-
-/** Composables */
 
 /**
  *
  * @param lists (state) list of [UserList] to display the names
- * @param newName (state) name of a new list
  * @param onAddList (event) request a list be added
  * @param onRemoveList (event) request a list be removed
- * @param onRemoveAllLists (event) request that all lists be removed
  * @param onEditDone (event) request edit mode completion
- *
  * */
-@ExperimentalComposeUiApi
 @ExperimentalAnimationApi
+@ExperimentalComposeUiApi
 @Composable
-fun ListHome(
+fun HomeScreen(
     lists: List<UserList>,
-    newName: String,
+    deleteLists: List<UserList>,
     onAddList: (String) -> Unit,
+    onEditDone: () -> Unit,
     onRemoveList: (UserList) -> Unit,
-    onRemoveAllLists: () -> Unit,
-    onEditDone: () -> Unit
-) {
+    onListClicked: (UserList) -> Unit,
+    onRemoveLists: () -> Unit,
+    onCancel: () -> Unit
+){
     val lazyListState = rememberLazyListState()
 
     // Show the alert dialog when the FAB is clicked
     val showDialog = remember { mutableStateOf(false) }
 
-    // The coroutine scope for event handlers calling suspend functions.
+    // The coroutine scope for event handlers calling suspend functions
     val coroutineScope = rememberCoroutineScope()
 
-    // True if the message about the edit list feature is shown.
+    // True if the message about the edit list feature is shown
     var editMessageShown by remember { mutableStateOf(false) }
 
+    val enableDelete = remember { mutableStateOf(false) }
+
     // Shows a message about the edit list feature
-    suspend fun showEditMessage() {
-        if (!editMessageShown) {
+    suspend fun showEditMessage(){
+        if(!editMessageShown){
             editMessageShown = true
             delay(3000L)
             editMessageShown = false
         }
     }
 
-    if (showDialog.value) {
+    if(showDialog.value){
         NameInputDialog(
             showDialog = showDialog.value,
             onSaveName = onAddList,
@@ -91,18 +90,34 @@ fun ListHome(
         )
     }
 
-    // TODO: Add functionality to delete all lists
-
     ListAppTheme {
         Scaffold(
-            topBar = { AppBar(
-                title = stringResource(R.string.home_screen_label)
-            )},
-            floatingActionButton = {
-                CreateFloatingActionButton(
-                    extended = lazyListState.isScrollingUp(),
-                    onClick = { showDialog.value = true }
+            topBar = {
+                HomeAppBar(
+                    enableDelete = { enableDelete.value = true }
                 )
+            },
+            bottomBar = {
+                // Show bottom app bar if deleting
+                if(enableDelete.value){
+                    HomeBottomAppBar(
+                        enableDeleteButton = deleteLists.isNotEmpty(),
+                        onCancel = {
+                            enableDelete.value = false
+                            onCancel.invoke()
+                        },
+                        onDelete = onRemoveLists
+                    )
+                }
+            },
+            floatingActionButton = {
+                // Show FAB if not deleting
+                if(!enableDelete.value){
+                    CreateFloatingActionButton(
+                        extended = lazyListState.isScrollingUp(),
+                        onClick = { showDialog.value = true }
+                    )
+                }
             },
             floatingActionButtonPosition = FabPosition.End
         ) {
@@ -112,9 +127,13 @@ fun ListHome(
             } else {
                 ListHomeContent(
                     lists = lists,
+                    deleteLists = deleteLists,
                     state = lazyListState,
                     showMessage = editMessageShown,
+                    enableDelete = enableDelete.value,
+                    // option in dropdown menu
                     onRemove = onRemoveList,
+                    onListClicked = onListClicked,
                     onClick = {
                         coroutineScope.launch {
                             showEditMessage()
@@ -124,6 +143,7 @@ fun ListHome(
             }
         }
     }
+
 }
 
 /**
@@ -158,28 +178,44 @@ fun EmptyListHome() {
  *
  * @param lists (state) list of [UserList] to display the names
  * @param state (state) the state of the lazy list
- * @param onRemove(event) notify caller that a list is being removed
+ * @param showMessage (state) display message
+ * @param enableDelete (state) enable delete mode for user to delete lists
+ * @param onRemove (event) notify caller that a list is being removed
+ * @param onListClicked (event) notify caller that a row was selected/deselected to be deleted
+ * @param onClick (event) notify caller to show message
  * */
 @ExperimentalAnimationApi
 @Composable
 fun ListHomeContent(
     lists: List<UserList>,
+    deleteLists: List<UserList>,
     state: LazyListState,
     showMessage: Boolean,
+    enableDelete: Boolean,
     onRemove: (UserList) -> Unit,
-    onClick: () -> Unit
+    onListClicked: (UserList) -> Unit,
+    onClick: (UserList) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(top = 8.dp),
         state = state
     ) {
         items(lists) { list ->
-            ListRow(
-                list = list,
-                onListClicked = onClick,
-                onRemove = onRemove,
-                modifier = Modifier.fillMaxWidth()
-            )
+            if(enableDelete){
+                DeleteRow(
+                    list = list,
+                    beDeleted = deleteLists.contains(list),
+                    onListClicked = onListClicked,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }else{
+                ListRow(
+                    list = list,
+                    onListClicked = onClick,
+                    onRemove = onRemove,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
     EditMessage(showMessage)
@@ -196,7 +232,7 @@ fun ListHomeContent(
 @Composable
 fun ListRow(
     list: UserList,
-    onListClicked: () -> Unit,
+    onListClicked: (UserList) -> Unit,
     onRemove: (UserList) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -208,11 +244,49 @@ fun ListRow(
         shape = RoundedCornerShape(10.dp),
     ) {
         Row(modifier
-            .clickable { onListClicked() } // FIXME: Pass list back in -> onListClicked(list)
+            .clickable { onListClicked(list) }
             .padding(horizontal = 16.dp, vertical = 16.dp)
             .fillMaxWidth()
         ) {
             Text(list.listName)
+        }
+    }
+}
+
+/**
+ * A composable that displays a full-width [UserList]
+ *
+ * @param list a [UserList] to display name
+ * @param beDeleted (state) display
+ * @param onListClicked (event) notify caller that a row was clicked
+ * @param modifier modifier for this element
+ * */
+@Composable
+fun DeleteRow(
+    list: UserList,
+    beDeleted: Boolean,
+    onListClicked: (UserList) -> Unit,
+    modifier: Modifier = Modifier
+){
+    Surface(
+        modifier = Modifier.padding(8.dp),
+        color = MaterialTheme.colors.primaryVariant,
+        shape = RoundedCornerShape(10.dp)
+    ) {
+        Row(modifier
+            .clickable { onListClicked(list) }
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .fillMaxSize()
+        ){
+            Text(list.listName)
+            // Show a check mark if list was selected to be deleted
+            if(beDeleted){
+                Icon(
+                    Icons.Default.Done,
+                    contentDescription = "Makes a list for deletion.",
+                    modifier = Modifier.padding(start = 50.dp)
+                )
+            }
         }
     }
 }
@@ -248,6 +322,7 @@ private fun CreateFloatingActionButton(extended: Boolean, onClick: () -> Unit) {
     }
 }
 
+// TODO: Move to another file so it can be used by Manage List Screen
 /**
  * The modified element can be horizontally swiped away
  *
@@ -327,6 +402,7 @@ private fun Modifier.swipeToDismiss(
         .offset { IntOffset(offSetX.value.roundToInt(), 0) }
 }
 
+// TODO: Move this to another file with swipeToDismiss so it can be used in Manage List Screen
 /**
  * Returns whether the lazy list is currently scrolling up.
  *
@@ -385,62 +461,42 @@ private fun EditMessage(show: Boolean) {
     }
 }
 
-@ExperimentalAnimationApi
-@Preview
-@Composable
-fun PreviewListHomeContent() {
-    val names = listOf(
-        UserList(1, "Shopping List"),
-        UserList(2, "School Supplies"),
-        UserList(3, "Road Trip Itinerary")
-    )
-    val lazyListState = rememberLazyListState()
-
-    // True if the message about the edit list feature is shown.
-    val editMessageShown by remember { mutableStateOf(false) }
-
-    ListHomeContent(
-        lists = names,
-        state = lazyListState,
-        showMessage = editMessageShown,
-        onRemove = {},
-        onClick = {}
-    )
-}
-
-@ExperimentalAnimationApi
 @ExperimentalComposeUiApi
-@Preview
-@Composable
-fun PreviewListHome() {
-    val names = listOf(
-        UserList(1, "Shopping List"),
-        UserList(2, "School Supplies"),
-        UserList(3, "Road Trip Itinerary")
-    )
-
-    ListHome(
-        lists = names,
-        newName = "",
-        onAddList = {},
-        onRemoveList = {},
-        onRemoveAllLists = {},
-        onEditDone = {}
-    )
-}
-
 @ExperimentalAnimationApi
-@ExperimentalComposeUiApi
 @Preview
 @Composable
-fun PreviewEmptyListHome() {
-
-    ListHome(
+fun PreviewEmptyHomeScreen(){
+    HomeScreen(
         lists = emptyList(),
-        newName = "",
+        deleteLists = emptyList(),
         onAddList = {},
+        onEditDone = {},
         onRemoveList = {},
-        onRemoveAllLists = {},
-        onEditDone = {}
+        onListClicked = {},
+        onRemoveLists = {},
+        onCancel = {}
+    )
+}
+
+@ExperimentalComposeUiApi
+@ExperimentalAnimationApi
+@Preview
+@Composable
+fun PreviewHomeScreen(){
+    val names = listOf(
+        UserList(1, "Shopping List"),
+        UserList(2, "School Supplies"),
+        UserList(3, "Road Trip Itinerary")
+    )
+
+    HomeScreen(
+        lists = names,
+        deleteLists = emptyList(),
+        onAddList = {},
+        onEditDone = {},
+        onRemoveList = {},
+        onListClicked = {},
+        onRemoveLists = {},
+        onCancel = {}
     )
 }

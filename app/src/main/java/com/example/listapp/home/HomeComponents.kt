@@ -177,6 +177,17 @@ fun NameInputText(
     )
 }
 
+/**
+ * Extension function to show a snackbar message
+ *
+ * @param doneShowing (event) notify caller to stop showing snackbar
+ * */
+//fun showSnackbar(
+//    doneShowing: (String) -> Unit
+//){
+//
+//}
+
 @ExperimentalComposeUiApi
 @Preview
 @Composable
