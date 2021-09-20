@@ -1,56 +1,41 @@
-package com.example.listapp
+package com.example.listapp.utils
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.listapp.data.UserList
 import com.example.listapp.home.HomeDropDownMenu
+import com.example.listapp.home.ManageDropDownMenu
 
-/** 
- * The [TopAppBar] for the Home screen.
+/**
+ * A custom composable top app bar.
  *
+ * @param title the name of the screen
  * @param enableDelete (event) notify caller to allow user to delete lists
+ * @param navIcon The navigation icon for the screen
+ * @param dropDownMenu The drop down menu for the screen
  * */
 @Composable
-fun HomeAppBar(
-    enableDelete: () -> Unit
+fun CustomTopAppBar(
+    title: String,
+    enableDelete: () -> Unit,
+    navIcon: @Composable (() -> Unit)?,
+    dropDownMenu: @Composable (() -> Unit) -> Unit
 ){
-    Surface(
-        color = MaterialTheme.colors.primarySurface
-    ) {
-        TopAppBar(
-            title = {
-                Text(
-                    text = "Home",
-                    color = MaterialTheme.colors.onPrimary
-                )
-            },
-            navigationIcon = {
-                // Show drawer icon
-                IconButton(
-                    modifier = Modifier.padding(16.dp),
-                    onClick = { /*TODO*/ }
-                ) {
-                    Icon(
-                        Icons.Filled.Menu,
-                        contentDescription = null
-                    )
-                }
-            },
-            actions = {
-                  HomeDropDownMenu(
-                      enableDelete = enableDelete
-                  )
-            },
-            backgroundColor = MaterialTheme.colors.primarySurface,
-            elevation = AppBarDefaults.TopAppBarElevation
-        )
-    }
+    TopAppBar(
+        navigationIcon = navIcon,
+        title = { Text(text = title)},
+        actions = { dropDownMenu(enableDelete) },
+        elevation = AppBarDefaults.TopAppBarElevation
+    )
 }
 
 /**
@@ -61,7 +46,7 @@ fun HomeAppBar(
  * @param onDelete (event) notify caller to delete the selected items
  * */
 @Composable
-fun HomeBottomAppBar(
+fun CustomBottomAppBar(
     enableDeleteButton: Boolean,
     onCancel: () -> Unit,
     onDelete: () -> Unit
@@ -105,17 +90,60 @@ fun HomeBottomAppBar(
 
 @Preview
 @Composable
-fun PreviewHomeAppBar(){
+fun PreviewHomeTopAppBar(){
 
-    HomeAppBar(
-        enableDelete = {}
+    CustomTopAppBar(
+        title = "Home",
+        enableDelete = { },
+        navIcon = {
+            IconButton(
+                onClick = { /*TODO*/ }
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Menu,
+                    contentDescription = null
+                )
+            }
+        },
+        dropDownMenu = {
+            HomeDropDownMenu(
+                enableDelete = { }
+            )}
+    )
+}
+
+@Preview
+@Composable
+fun PreviewManageTopAppBar(){
+
+    CustomTopAppBar(
+        title = "Shopping List",
+        enableDelete = {  },
+        navIcon = {
+            IconButton(
+                modifier = Modifier.padding(16.dp),
+                onClick = {}
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = null)
+            }
+        },
+        dropDownMenu = {
+            ManageDropDownMenu(
+                list = UserList(0L, "Shopping List"),
+                enableDeleteItems = {  },
+                enableEditName = {},
+                enableDeleteList = {}
+            )
+        }
     )
 }
 
 @Preview
 @Composable
 fun PreviewHomeBottomAppBarEnabled(){
-    HomeBottomAppBar(
+    CustomBottomAppBar(
         enableDeleteButton = true,
         onCancel = {},
         onDelete = {}
@@ -125,7 +153,7 @@ fun PreviewHomeBottomAppBarEnabled(){
 @Preview
 @Composable
 fun PreviewHomeBottomAppBarDisabled(){
-    HomeBottomAppBar(
+    CustomBottomAppBar(
         enableDeleteButton = false,
         onCancel = {},
         onDelete = {}

@@ -7,7 +7,6 @@ import androidx.room.*
 interface ListDao {
 
     /** Functions for UserList entity */
-    // FIXME: Change applicable functions back to suspend when done with testing
     // Insert a new list into the database
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertList(list: UserList)
@@ -18,7 +17,7 @@ interface ListDao {
 
     // Select a list with the given id
     @Query("SELECT * FROM list_table WHERE id = :key")
-    fun selectList(key: Long): UserList
+    suspend fun selectList(key: Long): UserList
 
     // Select all lists
     @Query("SELECT * FROM list_table ORDER BY id")
@@ -61,5 +60,6 @@ interface ListDao {
     // Get all items of a list
     @Transaction
     @Query("SELECT * FROM list_table WHERE id = :key")
-    suspend fun getListWithItems(key: Long): List<ListWithItems>
+    //suspend fun getListWithItems(key: Long): List<ListWithItems>
+    fun getListWithItems(key: Long): LiveData<List<ListWithItems>>
 }

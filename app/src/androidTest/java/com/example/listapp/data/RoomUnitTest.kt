@@ -72,8 +72,10 @@ class RoomUnitTest {
      * */
     @Test
     fun testGetList(){
-        val list = listDao.selectList(listB.id)
-        assertThat(list, equalTo(listB))
+        runBlocking {
+            val list = listDao.selectList(listB.id)
+            assertThat(list, equalTo(listB))
+        }
     }
 
     /**
@@ -86,7 +88,7 @@ class RoomUnitTest {
                 listDao.insertItem(Item(0L, 1, item))
             }
 
-            val result = listDao.getListWithItems(1)[0].items
+            val result = listDao.getListWithItems(1).value!![0].items
 
             assertThat(result[0].itemStr, equalTo(itemsA[0]))
             assertThat(result[1].itemStr, equalTo(itemsA[1]))
@@ -121,7 +123,7 @@ class RoomUnitTest {
             // Delete all items in the list
             listDao.deleteItems(1)
 
-            val result = listDao.getListWithItems(1)[0].items
+            val result = listDao.getListWithItems(1).value!![0].items
 
             assertThat(result.size, equalTo(0))
 
