@@ -63,16 +63,25 @@ fun HomeBody(
     val onShowDeleteSnackbar: (UserList) -> Unit = {list ->
         coroutineScope.launch {
             scaffoldState.snackbarHostState.showSnackbar(
-                message = "${list.listName} deleted"
+                message = "Successfully Deleted ${list.listName}"
             )
         }
     }
 
-    // Snackbar for deleting at least one list
-    val onShowDeleteListsSnackbar: (List<UserList>) -> Unit = {list ->
+//    // Snackbar for deleting at least one list
+//    val onShowDeleteListsSnackbar: (List<UserList>) -> Unit = {list ->
+//        coroutineScope.launch {
+//            scaffoldState.snackbarHostState.showSnackbar(
+//                message = "${list.size} List(s) Deleted"
+//            )
+//        }
+//    }
+
+    // Snackbar for creating a new list
+    val onShowCreateListSnackbar: (String) -> Unit = { name ->
         coroutineScope.launch {
             scaffoldState.snackbarHostState.showSnackbar(
-                message = "${list.size} list(s) deleted"
+                message = "$name Successfully Created"
             )
         }
     }
@@ -85,7 +94,8 @@ fun HomeBody(
             showDialog = showNameDialog.value,
             onSaveName = onAddList,
             onDismissed = { showNameDialog.value = false },
-            onEditDone = onEditDone
+            onEditDone = onEditDone,
+            showSnackbar = onShowCreateListSnackbar
         )
     }
 
@@ -119,14 +129,20 @@ fun HomeBody(
                 if(enableDelete.value){
                     CustomBottomAppBar(
                         enableDeleteButton = deleteLists.isNotEmpty(),
+                        deleteButtonText = if(deleteLists.isEmpty()) "Delete"
+                        else "${deleteLists.size} list(s) Selected",
                         onCancel = {
                             enableDelete.value = false
                             onCancel.invoke("Lists")
                         },
-                        onDelete = {
-                            onRemoveLists.invoke()
-                            onShowDeleteListsSnackbar.invoke(deleteLists)
-                        }
+                        onDelete = onRemoveLists
+//                        showSnackbar = {
+//                            coroutineScope.launch {
+//                                scaffoldState.snackbarHostState.showSnackbar(
+//                                    message = "${deleteLists.size} List(s) Deleted"
+//                                )
+//                            }
+//                        }
                     )
                 }
             },

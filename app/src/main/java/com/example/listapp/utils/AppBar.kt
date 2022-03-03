@@ -8,7 +8,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.listapp.data.UserList
@@ -48,8 +47,10 @@ fun CustomTopAppBar(
 @Composable
 fun CustomBottomAppBar(
     enableDeleteButton: Boolean,
+    deleteButtonText: String = "Delete",
     onCancel: () -> Unit,
     onDelete: () -> Unit
+    //showSnackbar: () -> Unit
 ){
     Surface(
         color = MaterialTheme.colors.secondaryVariant
@@ -72,16 +73,17 @@ fun CustomBottomAppBar(
                 enabled = enableDeleteButton,
                 onClick = {
                     onDelete.invoke()
+                    //showSnackbar.invoke()
                     onCancel.invoke()
                 }
             ) {
                 if(enableDeleteButton){
                     Text(
-                        text = "Delete",
+                        text = deleteButtonText,
                         color = MaterialTheme.colors.onSecondary
                     )
                 }else{
-                    Text(text = "Delete")
+                    Text(text = deleteButtonText)
                 }
             }
         }
@@ -147,6 +149,7 @@ fun PreviewHomeBottomAppBarEnabled(){
         enableDeleteButton = true,
         onCancel = {},
         onDelete = {}
+        //showSnackbar = {}
     )
 }
 
@@ -157,5 +160,6 @@ fun PreviewHomeBottomAppBarDisabled(){
         enableDeleteButton = false,
         onCancel = {},
         onDelete = {}
+        //showSnackbar = {}
     )
 }
